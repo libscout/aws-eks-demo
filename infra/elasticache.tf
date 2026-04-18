@@ -3,17 +3,16 @@
 # ==============================================================================
 
 module "elasticache" {
-  source  = "terraform-aws-modules/elasticache/aws"
-  version = "1.11.0"
+  source = "../modules/elasticache"
 
-  cluster_id           = "${var.cluster_name}-redis"
-  description          = "Redis cluster for ${var.cluster_name}"
-  engine               = "redis"
-  engine_version       = "7.0"
-  node_type            = var.redis_node_type
-  num_cache_nodes      = var.redis_num_cache_nodes
-  port                 = 6379
-  apply_immediately    = true
+  cluster_id        = "${var.cluster_name}-redis"
+  description       = "Redis cluster for ${var.cluster_name}"
+  engine            = "redis"
+  engine_version    = "7.0"
+  node_type         = var.redis_node_type
+  num_cache_nodes   = var.redis_num_cache_nodes
+  port              = 6379
+  apply_immediately = true
 
   subnet_ids         = module.vpc.private_subnets
   security_group_ids = [module.redis_sg.security_group_id]

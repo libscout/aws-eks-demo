@@ -3,8 +3,7 @@
 # ==============================================================================
 
 module "msk" {
-  source  = "terraform-aws-modules/msk-kafka-cluster/aws"
-  version = "3.1.0"
+  source = "../modules/msk"
 
   cluster_name           = "${var.cluster_name}-kafka"
   kafka_version          = "3.5.1"
@@ -17,8 +16,8 @@ module "msk" {
 
   encryption_in_transit_client_broker = "TLS"
 
-  logging_enabled = true
-  cloudwatch_log_group_name          = "/aws/msk/${var.cluster_name}"
+  logging_enabled                        = true
+  cloudwatch_log_group_name              = "/aws/msk/${var.cluster_name}"
   cloudwatch_log_group_retention_in_days = var.environment == "prod" ? 90 : 30
 
   tags = merge(var.additional_tags, {

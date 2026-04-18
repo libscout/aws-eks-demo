@@ -73,6 +73,19 @@ resource "aws_iam_role_policy_attachment" "node_ecr" {
   role       = aws_iam_role.node.name
 }
 
+resource "aws_iam_role_policy_attachment" "node_xray" {
+  count      = var.enable_xray ? 1 : 0
+  policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AWSXRayDaemonWriteAccess"
+  role       = aws_iam_role.node.name
+}
+
+resource "aws_iam_role_policy_attachment" "node_ssm" {
+  count      = var.enable_ssm_access ? 1 : 0
+  policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  role       = aws_iam_role.node.name
+}
+
+
 # ==============================================================================
 # OIDC Provider for IRSA
 # ==============================================================================
@@ -83,25 +96,4 @@ resource "aws_iam_openid_connect_provider" "eks" {
   url             = aws_eks_cluster.this.identity[0].oidc[0].issuer
 
   tags = var.tags
-}
-
-# ==============================================================================
-# Additional Node Policies (Optional)
-# ==============================================================================
-
-
-resource "aws_iam_role_policy_attachment" "node_xray" {
-  count      = var.enable_xray ? 1 : 0
-  policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AWSXRayDaemonWriteAccess"
-  role       = aws_iam_role.node.name
-}
-
-# ==============================================================================
-# SSM Session Manager Access (Optional but recommended)
-# ==============================================================================
-
-resource "aws_iam_role_policy_attachment" "node_ssm" {
-  count      = var.enable_ssm_access ? 1 : 0
-  policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
-  role       = aws_iam_role.node.name
 }

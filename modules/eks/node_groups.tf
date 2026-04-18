@@ -42,8 +42,7 @@ resource "aws_eks_node_group" "this" {
 resource "aws_launch_template" "this" {
   for_each = var.node_groups
 
-  name_prefix   = "${var.cluster_name}-${each.key}-"
-  instance_type = each.value.instance_types[0]
+  name_prefix = "${var.cluster_name}-${each.key}-"
 
   block_device_mappings {
     device_name = "/dev/xvda"
@@ -63,7 +62,7 @@ resource "aws_launch_template" "this" {
   metadata_options {
     http_endpoint               = "enabled"
     http_tokens                 = "required"
-    http_put_response_hop_limit = 1
+    http_put_response_hop_limit = 2
   }
 
   tag_specifications {

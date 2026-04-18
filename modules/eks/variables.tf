@@ -99,7 +99,6 @@ variable "log_retention_in_days" {
 variable "kms_key_arn" {
   description = "ARN of an existing KMS key to use for encrypting Kubernetes secrets. If not provided, a new key will be created."
   type        = string
-  nullable    = false
 }
 
 variable "encryption_resources" {

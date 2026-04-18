@@ -3,38 +3,37 @@
 # ==============================================================================
 
 module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "21.18.0"
+  source = "../modules/eks"
 
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
 
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets
+  vpc_id       = module.vpc.vpc_id
+  subnet_ids   = module.vpc.private_subnets
+  subnet_cidrs = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i)]
 
-  cluster_endpoint_public_access  = true
-  cluster_endpoint_private_access = true
+  endpoint_public_access  = false
+  endpoint_private_access = true
+  public_access_cidrs     = []
 
-  # Enable IRSA for pod-level permissions
-  enable_irsa = true
+  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+  log_retention_in_days     = 30
 
-  # Cluster logging
-  cluster_enabled_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+  encryption_resources = ["secrets"]
 
-  eks_managed_node_groups = {
+  node_groups = {
     default = {
       instance_types = var.node_instance_types
       min_size       = var.node_min_capacity
       max_size       = var.node_max_capacity
       desired_size   = var.node_desired_capacity
-
-      # Enable IMDSv2
-      metadata_options = {
-        http_endpoint = "enabled"
-        http_tokens   = "required"
-      }
     }
   }
+
+  enable_cloudwatch_agent = true
+  enable_xray             = true
+  enable_ssm_access       = true
+  alarm_actions           = []
 
   tags = merge(var.additional_tags, {
     Name = var.cluster_name

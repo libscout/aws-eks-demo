@@ -110,6 +110,61 @@ variable "msk_number_of_broker_nodes" {
   default     = 2
 }
 
+# EKS Module Configuration
+variable "endpoint_public_access" {
+  description = "Whether the EKS public API server endpoint is enabled."
+  type        = bool
+  default     = true
+}
+
+variable "endpoint_private_access" {
+  description = "Whether the EKS private API server endpoint is enabled."
+  type        = bool
+  default     = true
+}
+
+variable "public_access_cidrs" {
+  description = "List of CIDR blocks that can access the EKS public API server endpoint."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "log_retention_in_days" {
+  description = "Number of days to retain EKS CloudWatch logs."
+  type        = number
+  default     = 30
+}
+
+variable "encryption_resources" {
+  description = "List of Kubernetes resources to encrypt using the KMS key."
+  type        = list(string)
+  default     = ["secrets"]
+}
+
+variable "enable_cloudwatch_agent" {
+  description = "Whether to attach the CloudWatch Agent policy to node groups."
+  type        = bool
+  default     = false
+}
+
+variable "enable_xray" {
+  description = "Whether to attach the X-Ray Daemon write access policy to node groups."
+  type        = bool
+  default     = false
+}
+
+variable "enable_ssm_access" {
+  description = "Whether to attach SSM Managed Instance Core policy to node groups."
+  type        = bool
+  default     = false
+}
+
+variable "alarm_actions" {
+  description = "List of ARNs for SNS topics to trigger when CloudWatch alarms are in ALARM state."
+  type        = list(string)
+  default     = []
+}
+
 # Tags
 variable "additional_tags" {
   description = "Additional tags to apply to all resources."
