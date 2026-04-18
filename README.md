@@ -80,7 +80,7 @@ terraform {
   backend "s3" {
     bucket         = "your-terraform-state-bucket"
     key            = "eks-demo/terraform.tfstate"
-    region         = "us-east-1"
+    region         = "us-east-2"
     encrypt        = true
     dynamodb_table = "terraform-locks"
   }
@@ -137,7 +137,7 @@ For CI/CD:
 
 ```bash
 # Create S3 bucket for state
-aws s3api create-bucket --bucket your-terraform-state-bucket --region us-east-1
+aws s3api create-bucket --bucket your-terraform-state-bucket --region us-east-2
 
 # Enable versioning
 aws s3api put-bucket-versioning \
@@ -155,7 +155,7 @@ aws dynamodb create-table \
   --attribute-definitions AttributeName=LockID,AttributeType=S \
   --key-schema AttributeName=LockID,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST \
-  --region us-east-1
+  --region us-east-2
 ```
 
 ### Environment Separation
@@ -176,7 +176,7 @@ Create environment-specific variable files:
 # environments/dev.tfvars
 environment      = "dev"
 cluster_name     = "eks-demo-dev"
-region           = "us-east-1"
+region           = "us-east-2"
 instance_types   = ["t3.medium"]
 desired_capacity = 2
 max_capacity     = 4

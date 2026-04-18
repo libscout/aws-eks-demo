@@ -8,10 +8,10 @@ module "elasticache" {
   cluster_id        = "${var.cluster_name}-redis"
   description       = "Redis cluster for ${var.cluster_name}"
   engine            = "redis"
-  engine_version    = "7.0"
+  engine_version    = var.redis_engine_version
   node_type         = var.redis_node_type
   num_cache_nodes   = var.redis_num_cache_nodes
-  port              = 6379
+  port              = var.redis_port
   apply_immediately = true
 
   subnet_ids         = module.vpc.private_subnets
@@ -23,8 +23,8 @@ module "elasticache" {
 
   automatic_failover_enabled = var.environment == "prod"
   multi_az_enabled           = var.environment == "prod"
-  snapshot_retention_limit   = var.environment == "prod" ? 7 : 0
-  snapshot_window            = "05:00-06:00"
+  snapshot_retention_limit   = var.redis_snapshot_retention_limit
+  snapshot_window            = var.redis_snapshot_window
 
   tags = merge(var.additional_tags, {
     Name = "${var.cluster_name}-redis"
@@ -48,7 +48,8 @@ module "redis_sg" {
     }
   ]
 
-  egress_rules = ["all-all"]
+  egress_cidr_blocks = [module.vpc.vpc_cidr_block]
+  egress_rules       = ["all-all"]
 
   tags = merge(var.additional_tags, {
     Name = "${var.cluster_name}-redis-sg"

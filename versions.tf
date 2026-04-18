@@ -1,22 +1,22 @@
 terraform {
-  required_version = ">= 1.14.0"
+  required_version = ">= 1.5"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 6.0"
+      version = "~> 5.0"
     }
   }
 
   # Remote backend configuration
   # Uncomment and configure for production use:
-  # backend "s3" {
-  #   bucket         = "your-terraform-state-bucket"
-  #   key            = "eks-demo/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   encrypt        = true
-  #   dynamodb_table = "terraform-locks"
-  # }
+  backend "s3" {
+    bucket       = "your-terraform-state-bucket"
+    key          = "eks-demo/terraform.tfstate"
+    region       = "us-east-2"
+    encrypt      = true
+    use_lockfile = true
+  }
 }
 
 provider "aws" {

@@ -7,17 +7,17 @@ module "ecr" {
   version = "3.2.0"
 
   repository_name                 = "${var.cluster_name}/api"
-  repository_image_tag_mutability = "MUTABLE"
+  repository_image_tag_mutability = var.ecr_tag_mutability
 
   repository_lifecycle_policy = jsonencode({
     rules = [
       {
         rulePriority = 1
-        description  = "Keep last 10 images"
+        description  = "Keep last ${var.ecr_lifecycle_image_count} images"
         selection = {
           tagStatus   = "any"
           countType   = "imageCountMoreThan"
-          countNumber = 10
+          countNumber = var.ecr_lifecycle_image_count
         }
         action = {
           type = "expire"

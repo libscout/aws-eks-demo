@@ -7,7 +7,7 @@ module "rds" {
 
   identifier     = "${var.cluster_name}-postgres"
   engine         = "postgres"
-  engine_version = "18.3"
+  engine_version = var.db_engine_version
   instance_class = var.db_instance_class
 
   allocated_storage = var.db_allocated_storage
@@ -15,18 +15,18 @@ module "rds" {
   storage_encrypted = true
   kms_key_id        = aws_kms_key.main.arn
 
-  db_name                       = "appdb"
+  db_name                       = var.db_name
   username                      = var.db_username
   master_user_secret_kms_key_id = aws_kms_key.main.arn
 
-  port                    = 5432
+  port                    = var.db_port
   publicly_accessible     = false
   multi_az                = var.environment == "prod"
   skip_final_snapshot     = var.environment == "dev"
   deletion_protection     = var.environment == "prod"
-  backup_retention_period = var.environment == "prod" ? 7 : 1
-  backup_window           = "03:00-04:00"
-  maintenance_window      = "Mon:04:00-Mon:05:00"
+  backup_retention_period = var.db_backup_retention_period
+  backup_window           = var.db_backup_window
+  maintenance_window      = var.db_maintenance_window
 
   vpc_security_group_ids = [module.rds_sg.security_group_id]
   subnet_ids             = module.vpc.private_subnets
@@ -53,7 +53,8 @@ module "rds_sg" {
     }
   ]
 
-  egress_rules = ["all-all"]
+  egress_cidr_blocks = [module.vpc.vpc_cidr_block]
+  egress_rules       = ["all-all"]
 
   tags = merge(var.additional_tags, {
     Name = "${var.cluster_name}-rds-sg"

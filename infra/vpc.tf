@@ -13,7 +13,7 @@ module "vpc" {
   public_subnet_cidrs  = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + length(var.availability_zones))]
 
   enable_nat_gateway      = true
-  flow_log_retention_days = var.environment == "prod" ? 30 : 7
+  flow_log_retention_days = var.log_retention_in_days
 
   tags = merge(var.additional_tags, {
     Name = "${var.cluster_name}-vpc"

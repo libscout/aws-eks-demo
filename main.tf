@@ -7,37 +7,63 @@
 module "infra" {
   source = "./infra"
 
-  environment = "dev"
+  environment     = local.env
+  cluster_name    = var.cluster_name
+  cluster_version = var.cluster_version
 
-  region             = "eu-central-1"
-  availability_zones = ["eu-central-1a", "eu-central-1b"]
+  region             = var.region
+  availability_zones = var.availability_zones
 
-  cluster_name    = "demo"
-  cluster_version = "1.35"
+  # EKS
+  endpoint_public_access  = var.endpoint_public_access
+  endpoint_private_access = var.endpoint_private_access
+  public_access_cidrs     = var.public_access_cidrs
+  enable_cloudwatch_agent = var.enable_cloudwatch_agent
+  enable_xray             = var.enable_xray
+  enable_ssm_access       = var.enable_ssm_access
+  alarm_actions           = []
 
-  db_allocated_storage = 0
-  db_instance_class    = "db.t4g.micro"
-  db_password          = ""
-  db_username          = ""
+  # Node group
+  node_desired_capacity = var.node_desired_capacity
+  node_instance_types   = var.node_instance_types
+  node_max_capacity     = var.node_max_capacity
+  node_min_capacity     = var.node_min_capacity
 
-  msk_broker_instance_type   = ""
-  msk_number_of_broker_nodes = 0
+  # VPC
+  vpc_cidr = var.vpc_cidr
 
-  node_desired_capacity = 2
-  node_instance_types   = ["t4g.nano"]
-  node_max_capacity     = 2
-  node_min_capacity     = 2
+  # RDS
+  db_allocated_storage       = var.db_allocated_storage
+  db_instance_class          = var.db_instance_class
+  db_username                = var.db_username
+  db_engine_version          = var.db_engine_version
+  db_name                    = var.db_name
+  db_port                    = var.db_port
+  db_backup_retention_period = var.db_backup_retention_period
+  db_backup_window           = var.db_backup_window
+  db_maintenance_window      = var.db_maintenance_window
 
-  redis_node_type       = "cache.t3.micro"
-  redis_num_cache_nodes = 1
+  # ElastiCache
+  redis_node_type                = var.redis_node_type
+  redis_num_cache_nodes          = var.redis_num_cache_nodes
+  redis_engine_version           = var.redis_engine_version
+  redis_port                     = var.redis_port
+  redis_snapshot_retention_limit = var.redis_snapshot_retention_limit
+  redis_snapshot_window          = var.redis_snapshot_window
 
-  vpc_cidr = "10.0.0.0/16"
+  # MSK
+  msk_broker_instance_type   = var.msk_broker_instance_type
+  msk_number_of_broker_nodes = var.msk_number_of_broker_nodes
+  msk_kafka_version          = var.msk_kafka_version
+  msk_broker_ebs_volume_size = var.msk_broker_ebs_volume_size
+
+  # ECR
+  ecr_tag_mutability        = var.ecr_tag_mutability
+  ecr_lifecycle_image_count = var.ecr_lifecycle_image_count
+
+  # KMS
+  kms_deletion_window_in_days = var.kms_deletion_window_in_days
+
+  # Unified log retention
+  log_retention_in_days = var.log_retention_in_days
 }
-
-
-
-
-
-
-
-

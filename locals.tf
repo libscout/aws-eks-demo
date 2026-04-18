@@ -3,6 +3,6 @@
 # ==============================================================================
 
 locals {
-  env        = terraform.workspace
-  redis_port = 6379
+  // dev / prod
+  env = terraform.workspace
 }
