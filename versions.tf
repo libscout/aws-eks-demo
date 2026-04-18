@@ -24,7 +24,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Environment = var.environment
+      Environment = local.env
       ManagedBy   = "terraform"
       Project     = "eks-demo"
     }

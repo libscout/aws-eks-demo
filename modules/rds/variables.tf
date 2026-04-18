@@ -80,7 +80,6 @@ variable "kms_key_id" {
 variable "multi_az" {
   description = "Specifies if the RDS instance is multi-AZ"
   type        = bool
-  default     = false
 }
 
 variable "skip_final_snapshot" {
@@ -92,7 +91,6 @@ variable "skip_final_snapshot" {
 variable "deletion_protection" {
   description = "If the DB instance should have deletion protection enabled"
   type        = bool
-  default     = false
 }
 
 variable "backup_retention_period" {
@@ -110,7 +108,6 @@ variable "storage_type" {
 variable "publicly_accessible" {
   description = "Specifies if the RDS instance is publicly accessible"
   type        = bool
-  default     = false
 }
 
 variable "backup_window" {

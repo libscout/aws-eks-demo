@@ -5,11 +5,6 @@ variable "region" {
   default     = "us-east-1"
 }
 
-variable "environment" {
-  description = "The deployment environment (e.g., dev, staging, prod)."
-  type        = string
-}
-
 # VPC Configuration
 variable "vpc_cidr" {
   description = "The CIDR block for the VPC."

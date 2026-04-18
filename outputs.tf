@@ -29,9 +29,9 @@ output "eks_cluster_endpoint" {
   value       = module.infra.eks_cluster_endpoint
 }
 
-output "eks_cluster_certificate_authority_data" {
+output "eks_ca_cert" {
   description = "Base64 encoded certificate data required to communicate with the cluster."
-  value       = module.infra.eks_cluster_certificate_authority_data
+  value       = module.infra.eks_ca_cert
 }
 
 # RDS Outputs
@@ -46,9 +46,9 @@ output "rds_port" {
 }
 
 # ElastiCache Outputs
-output "redis_primary_endpoint_address" {
+output "redis_endpoint" {
   description = "The address of the Redis primary endpoint."
-  value       = module.infra.redis_primary_endpoint_address
+  value       = module.infra.redis_endpoint
 }
 
 output "redis_port" {
@@ -57,9 +57,9 @@ output "redis_port" {
 }
 
 # MSK Outputs
-output "msk_bootstrap_brokers_tls" {
+output "msk_brokers_tls" {
   description = "One or more DNS names (or IP addresses) which TLS Kafka clients can connect to."
-  value       = module.infra.msk_bootstrap_brokers_tls
+  value       = module.infra.msk_brokers_tls
 }
 
 output "msk_cluster_arn" {

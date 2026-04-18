@@ -1,9 +1,9 @@
-output "primary_endpoint_address" {
+output "endpoint" {
   description = "The address of the endpoint for the primary node in the replication group."
   value       = aws_elasticache_replication_group.this.primary_endpoint_address
 }
 
-output "configuration_endpoint_address" {
+output "config_endpoint" {
   description = "The configuration endpoint address for the replication group."
   value       = aws_elasticache_replication_group.this.configuration_endpoint_address
 }

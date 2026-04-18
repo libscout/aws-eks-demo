@@ -29,42 +29,42 @@ output "eks_cluster_endpoint" {
   value       = module.eks.cluster_endpoint
 }
 
-output "eks_cluster_certificate_authority_data" {
+output "eks_ca_cert" {
   description = "Base64 encoded certificate data required to communicate with the cluster."
-  value       = module.eks.cluster_certificate_authority_data
+  value       = module.eks.ca_cert
 }
 
 # RDS Outputs
 output "rds_endpoint" {
   description = "The connection endpoint for the RDS PostgreSQL instance."
-  value       = module.rds.db_instance_endpoint
+  value       = module.rds.endpoint
 }
 
 output "rds_port" {
   description = "The port the RDS PostgreSQL instance is listening on."
-  value       = module.rds.db_instance_port
+  value       = module.rds.port
 }
 
 # ElastiCache Outputs
-output "redis_primary_endpoint_address" {
+output "redis_endpoint" {
   description = "The address of the Redis primary endpoint."
-  value       = module.elasticache.elasticache_replication_group_primary_endpoint_address
+  value       = module.elasticache.endpoint
 }
 
 output "redis_port" {
   description = "The port the Redis cluster is listening on."
-  value       = module.elasticache.elasticache_replication_group_port
+  value       = module.elasticache.port
 }
 
 # MSK Outputs
-output "msk_bootstrap_brokers_tls" {
+output "msk_brokers_tls" {
   description = "One or more DNS names (or IP addresses) which TLS Kafka clients can connect to."
-  value       = module.msk.bootstrap_brokers_tls
+  value       = module.msk.brokers_tls
 }
 
 output "msk_cluster_arn" {
   description = "The Amazon Resource Name (ARN) of the MSK cluster."
-  value       = module.msk.cluster_arn
+  value       = module.msk.arn
 }
 
 # ECR Outputs

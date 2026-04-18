@@ -16,13 +16,11 @@ variable "availability_zones" {
 variable "private_subnet_cidrs" {
   description = "List of CIDR blocks for private subnets."
   type        = list(string)
-  nullable    = false
 }
 
 variable "public_subnet_cidrs" {
   description = "List of CIDR blocks for public subnets."
   type        = list(string)
-  nullable    = false
 }
 
 variable "cluster_name" {

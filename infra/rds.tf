@@ -49,7 +49,7 @@ module "rds_sg" {
   ingress_with_source_security_group_id = [
     {
       rule                     = "postgresql-tcp"
-      source_security_group_id = module.eks.node_security_group_id
+      source_security_group_id = module.eks.node_sg_id
     }
   ]
 

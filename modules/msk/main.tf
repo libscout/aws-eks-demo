@@ -18,10 +18,11 @@ resource "aws_msk_cluster" "this" {
 
   broker_node_group_info {
     instance_type   = var.broker_node_instance_type
-    ebs_volume_size = var.broker_node_ebs_volume_size
     client_subnets  = var.broker_node_client_subnets
     security_groups = var.broker_node_security_groups
   }
+
+  storage_mode = var.storage_mode
 
   encryption_info {
     encryption_in_transit {
