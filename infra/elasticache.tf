@@ -55,3 +55,27 @@ module "redis_sg" {
     Name = "${var.cluster_name}-redis-sg"
   })
 }
+
+# ==============================================================================
+# ElastiCache CloudWatch Alarms
+# ==============================================================================
+
+resource "aws_cloudwatch_metric_alarm" "redis_memory" {
+  alarm_name          = "${var.cluster_name}-redis-high-memory"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "MemoryUsage"
+  namespace           = "AWS/ElastiCache"
+  period              = 300
+  statistic           = "Average"
+  threshold           = 85
+  alarm_description   = "Triggers when average memory usage for the ElastiCache Redis cluster exceeds 85% for 2 consecutive periods."
+  alarm_actions       = var.alarm_actions
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    CacheClusterId = "${var.cluster_name}-redis"
+  }
+
+  tags = var.additional_tags
+}

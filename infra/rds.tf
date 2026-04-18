@@ -60,3 +60,27 @@ module "rds_sg" {
     Name = "${var.cluster_name}-rds-sg"
   })
 }
+
+# ==============================================================================
+# RDS CloudWatch Alarms
+# ==============================================================================
+
+resource "aws_cloudwatch_metric_alarm" "rds_cpu" {
+  alarm_name          = "${var.cluster_name}-rds-high-cpu"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/RDS"
+  period              = 300
+  statistic           = "Average"
+  threshold           = 80
+  alarm_description   = "Triggers when average CPU utilization for the RDS instance exceeds 80% for 2 consecutive periods."
+  alarm_actions       = var.alarm_actions
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    DBInstanceIdentifier = "${var.cluster_name}-postgres"
+  }
+
+  tags = var.additional_tags
+}
