@@ -23,6 +23,10 @@ module "infra" {
   enable_ssm_access       = var.enable_ssm_access
   alarm_actions           = []
 
+  # Security & Tags
+  encryption_resources = var.encryption_resources
+  additional_tags      = var.additional_tags
+
   # Node group
   node_desired_capacity = var.node_desired_capacity
   node_instance_types   = var.node_instance_types

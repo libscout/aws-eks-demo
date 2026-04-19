@@ -6,7 +6,7 @@
     - remote backends
     - codebase structure
     - provider version management
-    - community modules :contentReference[oaicite:0]{index=0}
+    - community modules
 
 ## Security
 
@@ -27,7 +27,7 @@
 - Do not put secrets into Terraform state; use **AWS Secrets Manager**.
 - Mark sensitive outputs as `sensitive`.
 - Continuously scan infra and code for misconfigurations and exposed credentials.
-- Enforce policy checks and governance guardrails. :contentReference[oaicite:1]{index=1}
+- Enforce policy checks and governance guardrails.
 
 ## Backend / State
 
@@ -39,7 +39,7 @@
     - backup and recovery
     - better operational reliability
 - Keep **separate backends per environment**.
-- Actively **monitor remote state activity**. :contentReference[oaicite:2]{index=2}
+- Actively **monitor remote state activity**.
 
 ## Codebase Structure
 

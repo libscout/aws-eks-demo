@@ -1,16 +1,29 @@
-name: Terraform CI/CD
+name: terraform
 
 on:
   pull_request:
-    branches: ["master"]
+    branches:
+      - master
     paths:
-      - "**.tf"
-      - "**.tfvars"
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - "**/*.hcl"
   push:
-    branches: ["master"]
+    branches:
+      - master
     paths:
-      - "**.tf"
-      - "**.tfvars"
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - "**/*.hcl"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to apply"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
 
 permissions:
   id-token: write
@@ -18,98 +31,216 @@ permissions:
   pull-requests: write
 
 env:
-  TF_WORKSPACE: ${{ github.event_name == 'pull_request' && 'dev' || 'prod' }}
+  TF_VERSION: "1.5"
+  AWS_REGION: "us-east-1"
   TF_INPUT: false
   TF_IN_AUTOMATION: true
 
 jobs:
-  terraform:
-    name: Terraform
+  validate:
+    name: Validate
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: .
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials (OIDC)
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        run: terraform validate
+
+  plan-dev:
+    name: Plan dev
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
+
+    concurrency:
+      group: terraform-plan-dev
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials for dev
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/terraform-github-actions-role
-          aws-region: us-east-2
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ">= 1.5"
+          terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Terraform Init
-        id: init
-        run: terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" -backend-config="key=eks-demo/terraform.tfstate" -backend-config="region=us-east-2" -backend-config="encrypt=true" -backend-config="dynamodb_table=terraform-locks"
+      - name: Terraform init
+        run: terraform init -input=false
 
-      - name: Terraform Workspace
+      - name: Terraform plan (dev)
         run: |
-          terraform workspace select $TF_WORKSPACE || terraform workspace new $TF_WORKSPACE
+          terraform plan \
+            -var-file=environments/dev.tfvars \
+            -input=false \
+            -no-color \
+            -out=tfplan-dev | tee plan-dev.txt
 
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt -check -recursive
-        continue-on-error: true
-
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -no-color -input=false -out=tfplan
-        continue-on-error: ${{ github.event_name == 'pull_request' }}
-
-      - name: Update PR Comment
-        uses: actions/github-script@v7
-        if: github.event_name == 'pull_request'
-        env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+      - name: Upload dev plan artifact
+        uses: actions/upload-artifact@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-            <details><summary>Validation Output</summary>
+          name: plan-dev
+          path: |
+            tfplan-dev
+            plan-dev.txt
 
-            \`\`\`\n
-            ${{ steps.validate.outputs.stdout }}
-            \`\`\`
+      - name: Add dev plan to PR summary
+        if: github.event_name == 'pull_request'
+        run: |
+          {
+            echo "## Terraform plan: dev"
+            echo ""
+            echo '```'
+            cat plan-dev.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
-            </details>
+  plan-prod:
+    name: Plan prod
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
 
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+    concurrency:
+      group: terraform-plan-prod
+      cancel-in-progress: true
 
-            <details><summary>Show Plan</summary>
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            \`\`\`\n
-            ${process.env.PLAN}
-            \`\`\`
+      - name: Configure AWS credentials for prod
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_PROD }}
 
-            </details>
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
 
-            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+      - name: Terraform init
+        run: terraform init -input=false
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
+      - name: Terraform plan (prod)
+        run: |
+          terraform plan \
+            -var-file=environments/prod.tfvars \
+            -input=false \
+            -no-color \
+            -out=tfplan-prod | tee plan-prod.txt
 
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
+      - name: Upload prod plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: plan-prod
+          path: |
+            tfplan-prod
+            plan-prod.txt
 
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false tfplan
+      - name: Add prod plan to PR summary
+        if: github.event_name == 'pull_request'
+        run: |
+          {
+            echo "## Terraform plan: prod"
+            echo ""
+            echo '```'
+            cat plan-prod.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  apply-dev:
+    name: Apply dev
+    runs-on: ubuntu-latest
+    needs:
+      - validate
+      - plan-dev
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    environment: development
+
+    concurrency:
+      group: terraform-apply-dev
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials for dev
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform apply (dev)
+        run: |
+          terraform apply \
+            -var-file=environments/dev.tfvars \
+            -input=false \
+            -auto-approve
+
+  apply-manual:
+    name: Apply manual
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    environment: ${{ github.event.inputs.environment == 'prod' && 'production' || 'development' }}
+
+    concurrency:
+      group: terraform-apply-${{ github.event.inputs.environment }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials for selected environment
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ github.event.inputs.environment == 'prod' && secrets.AWS_ROLE_ARN_PROD || secrets.AWS_ROLE_ARN_DEV }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform plan
+        run: |
+          terraform plan \
+            -var-file=environments/${{ github.event.inputs.environment }}.tfvars \
+            -input=false \
+            -out=tfplan
+
+      - name: Terraform apply
+        run: terraform apply -input=false tfplan

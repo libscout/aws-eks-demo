@@ -34,10 +34,10 @@ module "msk_sg" {
   vpc_id      = module.vpc.vpc_id
 
   ingress_cidr_blocks = []
-  ingress_rules       = ["kafka-tcp"]
+  ingress_rules       = ["kafka-broker-tcp"]
   ingress_with_source_security_group_id = [
     {
-      rule                     = "kafka-tcp"
+      rule                     = "kafka-broker-tcp"
       source_security_group_id = module.eks.node_sg_id
     }
   ]

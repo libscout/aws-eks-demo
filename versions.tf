@@ -10,13 +10,13 @@ terraform {
 
   # Remote backend configuration
   # Uncomment and configure for production use:
-  backend "s3" {
-    bucket       = "your-terraform-state-bucket"
-    key          = "eks-demo/terraform.tfstate"
-    region       = "us-east-2"
-    encrypt      = true
-    use_lockfile = true
-  }
+  # backend "s3" {
+  #   bucket       = "your-terraform-state-bucket"
+  #   key          = "eks-demo/terraform.tfstate"
+  #   region       = "us-east-2"
+  #   encrypt      = true
+  #   use_lockfile = true
+  # }
 }
 
 provider "aws" {

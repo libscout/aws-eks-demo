@@ -4,7 +4,7 @@
 
 module "ecr" {
   source  = "terraform-aws-modules/ecr/aws"
-  version = "3.2.0"
+  version = "2.4.0"
 
   repository_name                 = "${var.cluster_name}/api"
   repository_image_tag_mutability = var.ecr_tag_mutability
