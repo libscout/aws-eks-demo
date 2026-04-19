@@ -23,7 +23,7 @@ node_min_capacity     = 1
 # RDS Configuration
 db_instance_class          = "db.t4g.micro"
 db_allocated_storage       = 20
-db_engine_version          = "16.3"
+db_engine_version          = "18.3"
 db_name                    = "appdb"
 db_username                = "admin"
 db_port                    = 5432
@@ -34,7 +34,7 @@ db_maintenance_window      = "Mon:04:00-Mon:05:00"
 # ElastiCache Configuration
 redis_node_type                = "cache.t3.micro"
 redis_num_cache_nodes          = 1
-redis_engine_version           = "7.0"
+redis_engine_version           = "7.1"
 redis_port                     = 6379
 redis_snapshot_retention_limit = 0
 redis_snapshot_window          = "05:00-06:00"
@@ -42,7 +42,7 @@ redis_snapshot_window          = "05:00-06:00"
 # MSK Configuration
 msk_broker_instance_type   = "kafka.t3.small"
 msk_number_of_broker_nodes = 2
-msk_kafka_version          = "3.5.1"
+msk_kafka_version          = "4.1.x.kraft"
 msk_broker_ebs_volume_size = 100
 
 # ECR Configuration

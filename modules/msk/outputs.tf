@@ -17,8 +17,3 @@ output "brokers_sasl_iam" {
   description = "A list of broker addresses via SASL/IAM that can be used to connect to one of the brokers."
   value       = aws_msk_cluster.this.bootstrap_brokers_sasl_iam
 }
-
-output "zookeeper_tls" {
-  description = "A comma separated list of one or more Zookeeper connection strings for TLS connections."
-  value       = aws_msk_cluster.this.zookeeper_connect_string_tls
-}
