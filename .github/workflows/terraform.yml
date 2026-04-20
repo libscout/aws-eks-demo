@@ -15,15 +15,6 @@ on:
       - "**/*.tf"
       - "**/*.tfvars"
       - "**/*.hcl"
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "Environment to apply"
-        required: true
-        type: choice
-        options:
-          - dev
-          - prod
 
 permissions:
   id-token: write
@@ -207,25 +198,25 @@ jobs:
             -input=false \
             -auto-approve
 
-  apply-manual:
-    name: Apply manual
+  apply-prod-manual:
+    name: Apply prod (manual)
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
-    environment: ${{ github.event.inputs.environment == 'prod' && 'production' || 'development' }}
+    environment: production
 
     concurrency:
-      group: terraform-apply-${{ github.event.inputs.environment }}
+      group: terraform-apply-prod
       cancel-in-progress: false
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials for selected environment
+      - name: Configure AWS credentials for prod
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ github.event.inputs.environment == 'prod' && secrets.AWS_ROLE_ARN_PROD || secrets.AWS_ROLE_ARN_DEV }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_PROD }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -238,7 +229,7 @@ jobs:
       - name: Terraform plan
         run: |
           terraform plan \
-            -var-file=environments/${{ github.event.inputs.environment }}.tfvars \
+            -var-file=environments/prod.tfvars \
             -input=false \
             -out=tfplan
 
