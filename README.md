@@ -58,10 +58,7 @@ See detailed diagrams and component breakdown in [docs/architecture.md](docs/arc
   several root modules:
 
 1. Networking
-2. EKS
-
-   2.1. EKS bootstrap
-
+2. EKS <br>
+   2.1. EKS bootstrap <br>
    2.2. EKS setup with Helm
-
 3. Storage services declaration

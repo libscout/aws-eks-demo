@@ -198,6 +198,7 @@ jobs:
             -input=false \
             -auto-approve
 
+  #   ideally split into plan and apply
   apply-prod-manual:
     name: Apply prod (manual)
     runs-on: ubuntu-latest
