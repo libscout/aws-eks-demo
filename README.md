@@ -35,27 +35,20 @@ terraform apply -var-file="env/prod.tfvars"
 
 See detailed diagrams and component breakdown in [docs/architecture.md](docs/architecture.md).
 
-## Key Decisions
+## Assumptions / Key Decisions
 
-- **Private Subnets & SG Isolation:** RDS, ElastiCache, and MSK in private subnets; ingress restricted exclusively to
-  EKS Node SG.
-- **KMS Encryption:** Centralized KMS key for RDS, ElastiCache, EKS secrets, and MSK storage at rest.
-- **KRaft Mode for MSK:** Kafka 4.1.x.kraft to eliminate ZooKeeper dependency.
-- **Environment Parity:** Dev/Prod share same tfvars structure; Prod enables Multi-AZ, deletion protection, and private
-  EKS endpoint.
+- **Shared Infrastructure Scope:** This repository provisions shared infrastructure only (VPC, EKS, data stores). Application-specific resources and deployments are managed separately.
+- **Service Deployment & IAM:** Each service maintains its own repo and infrastructure (Terraform + Helm), creates the `ServiceAccount` and mapping it to an IAM role via IRSA or EKS Pod Identity.
 
-## What You Skipped and Why
+## What is Skipped and Why
 
-This configuration provisions AWS infrastructure only. Kubernetes-native components are skipped to separate infrastructure from application lifecycles:
+- **Load Balancer:** I think it should be installed using Helm. But to use Helm provider we need to split infra into several root modules:
 
-- **Load Balancer Controller & Ingress:** Handled by Helm/ArgoCD for dynamic routing.
-- **EBS CSI Driver & Storage Classes:** Deployed as K8s addons for PVC provisioning.
-- **Application Helm Charts:** Managed by CI/CD pipelines.
+1. Networking
+2. EKS
 
-### Proposed Modular Split
+   2.1. EKS bootstrap
 
-```mermaid
-graph LR
-    Net["1. Networking\n(VPC, Subnets, SGs)"] --> Comp["2. Compute & Storage\n(EKS, RDS, Redis, MSK)"]
-    Comp --> K8s["3. Kubernetes Services\n(LB Controller, CSI, Apps)"]
-```
+   2.2. EKS setup with Helm
+
+4. Storage services declaration
