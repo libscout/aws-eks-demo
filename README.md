@@ -37,12 +37,25 @@ See detailed diagrams and component breakdown in [docs/architecture.md](docs/arc
 
 ## Assumptions / Key Decisions
 
-- **Shared Infrastructure Scope:** This repository provisions shared infrastructure only (VPC, EKS, data stores). Application-specific resources and deployments are managed separately.
-- **Service Deployment & IAM:** Each service maintains its own repo and infrastructure (Terraform + Helm), creates the `ServiceAccount` and mapping it to an IAM role via IRSA or EKS Pod Identity.
+- **Shared Infrastructure Scope:** This repository provisions shared infrastructure only (VPC, EKS, data stores).
+  Application-specific resources and deployments are managed separately.
+- **Service Deployment & IAM:** Each service maintains its own repo and infrastructure (Terraform + Helm), creates the
+  `ServiceAccount` and mapping it to an IAM role via IRSA or EKS Pod Identity.
+
+## Technical Details
+
+- **State:** Remote backend (S3 with native locking) per environment.
+- **CI/CD:** GitHub Actions with OIDC. `plan` on PR, `apply` on `main` push. Manual dispatch available.
+- **Security:** Strictly no `0.0.0.0/0` on private SGs. Least-privilege ingress from EKS nodes only. IMDSv2 enforced.
+- **Secrets:** Credentials via AWS Secrets Manager. Zero hardcoding.
+- **Observability:** CloudWatch alarms for RDS CPU, Redis memory, EKS node pressure. VPC Flow Logs enabled.
+- **Outputs:** `outputs.tf` exposes endpoints for downstream service repos to consume.
+- **Modules:** `terraform-aws-modules/ecr`, `terraform-aws-modules/security-group`.
 
 ## What is Skipped and Why
 
-- **Load Balancer:** I think it should be installed using Helm. But to use Helm provider we need to split infra into several root modules:
+- **Load Balancer:** I think it should be installed using Helm. But to use Helm provider we need to split infra into
+  several root modules:
 
 1. Networking
 2. EKS
@@ -51,4 +64,4 @@ See detailed diagrams and component breakdown in [docs/architecture.md](docs/arc
 
    2.2. EKS setup with Helm
 
-4. Storage services declaration
+3. Storage services declaration
